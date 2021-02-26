@@ -12,13 +12,21 @@ module.exports = function (app) {
 
   app.route('/api/books')
     .get(function (req, res){
+      console.log("GET /api/books");
       //response will be array of book objects
       //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
+      return res.status(200).send("test");
     })
     
     .post(function (req, res){
       let title = req.body.title;
       //response will contain new book object including atleast _id and title
+      console.log("POST /api/books");
+      if (!req.body.title) {
+        return res.status(400).send("missing required field title");
+      }
+      
+      return res.status(201).send("test");
     })
     
     .delete(function(req, res){
