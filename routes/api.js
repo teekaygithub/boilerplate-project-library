@@ -62,12 +62,64 @@ module.exports = function (app) {
     .get(function (req, res){
       let bookid = req.params.id;
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+      console.log("GET /api/books/:id");
+
+      Book.findOne({_id: bookid}, function(err, book) {
+        if (err) {
+          const message = `server error: ${err}`;
+          console.log(message);
+          return res.status(500)>send(message);
+        }
+        
+        if (!book) {
+          return res.status(400).send("no book exists");
+        }
+
+        return res.status(200).json({
+          title: book.title,
+          _id: book._id,
+          comments: book.comments
+        });
+      });
     })
     
     .post(function(req, res){
       let bookid = req.params.id;
       let comment = req.body.comment;
       //json res format same as .get
+
+      if (!comment) {
+        return res.status(400).send("missing required field comment");
+      }
+
+      Book.findOne({_id: bookid}, async function(err, book) {
+        if (err) {
+          const message = `server error: ${err}`;
+          console.log(message);
+          return res.status(500).send(message);
+        }
+
+        if (!book) {
+          return res.status(404).send('no book exists');
+        }
+
+        book.comments.push(comment);
+        book.commentCount = book.comments.length;
+
+        await book.save(function(err) {
+          if (err) {
+            const message = `server error: ${err}`;
+            console.log(message);
+            return res.status(500).send(message);
+          }
+
+          return res.status(200).json({
+            title: book.title,
+            _id: book._id,
+            comments: book.comments
+          });
+        });
+      })
     })
     
     .delete(function(req, res){

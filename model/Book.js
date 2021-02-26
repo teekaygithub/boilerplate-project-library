@@ -9,7 +9,7 @@ const bookSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    comment: [String]
+    comments: [String]
 });
 
 const Book = mongoose.model("Book", bookSchema);
