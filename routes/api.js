@@ -53,7 +53,14 @@ module.exports = function (app) {
       //if successful response will be 'complete delete successful'
       console.log("DELETE /api/book");
 
-      return res.status(200).send("complete delete successful");
+      Book.remove({}, function(err) {
+        if (err) {
+          const message = `server error: ${err}`;
+          console.log(message);
+          return res.status(500).send(message);
+        }
+        return res.status(200).send("complete delete successful");
+      })
     });
 
 
@@ -123,8 +130,32 @@ module.exports = function (app) {
     })
     
     .delete(function(req, res){
-      let bookid = req.params.id;
+      // let bookid = req.params.id;
       //if successful response will be 'delete successful'
+      console.log("DELETE /api/books/:id");
+
+      let bookid = req.params.id;
+
+      Book.findOne({_id: bookid}, function(err, book) {
+        if (err) {
+          const message = `server error: ${err}`;
+          console.log(message);
+          return res.status(500).send(message);
+        }
+
+        if (!book) {
+          return res.status(404).send(`Could not find book with ID ${bookid}`);
+        }
+
+        book.remove(function(err) {
+          if (err) {
+            const message = `server error: ${err}`;
+            console.log(message);
+            return res.status(500).send(message);
+          }
+          return res.status(200).send("delete successful");
+        });
+      });
     });
   
 };
