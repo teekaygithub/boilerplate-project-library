@@ -7,6 +7,7 @@
 */
 
 'use strict';
+const Book = require('../model/Book');
 
 module.exports = function (app) {
 
@@ -15,7 +16,14 @@ module.exports = function (app) {
       console.log("GET /api/books");
       //response will be array of book objects
       //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
-      return res.status(200).send("test");
+      Book.find({}, function(err, books) {
+        if (err) {
+          console.log(`server error: ${err}`);
+          return res.status(500).send(`server error: ${err}`);
+        }
+
+        return res.status(200).send(books);
+      });
     })
     
     .post(function (req, res){
@@ -25,12 +33,27 @@ module.exports = function (app) {
       if (!req.body.title) {
         return res.status(400).send("missing required field title");
       }
-      
-      return res.status(201).send("test");
+
+      const book = new Book({
+        title: req.body.title,
+        commentCount: 0
+      });
+
+      book.save(function(err) {
+        if (err) {
+          console.log(`server error: ${err}`);
+          return res.status(500).send(`server error: ${err}`);
+        }
+
+        return res.status(201).json({title: book.title, _id: book._id});
+      });
     })
     
     .delete(function(req, res){
       //if successful response will be 'complete delete successful'
+      console.log("DELETE /api/book");
+
+      return res.status(200).send("complete delete successful");
     });
 
 
